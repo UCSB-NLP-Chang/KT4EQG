@@ -1,0 +1,56 @@
+# KT4EQG core dependencies (sufficient for evaluation and verifier inference).
+# Tested on Linux x86_64 + CUDA 12.x + Python 3.10.
+#
+# Training (Stage 1a SFT / Stage 1b PPO via verl) additionally requires
+# flash_attn, liger_kernel, triton, tensordict, vllm, ray, etc. — install those
+# from requirements-training.txt after you have a working CUDA/torch setup.
+#
+# Most pins are version ranges rather than exact: the exact versions used in
+# the original training environment were NPU-specific and many of them are
+# not published on the public PyPI (e.g. numpy 2.4.x, pandas 3.0.x). The
+# ranges below reflect versions known to work on CUDA Linux at paper time.
+
+# --- PyTorch stack (install first) ---
+torch>=2.4,<2.7
+torchvision
+torchdata
+
+# --- HuggingFace stack ---
+transformers>=4.46,<4.60
+tokenizers
+huggingface_hub>=0.26,<1.0
+safetensors>=0.4
+accelerate>=1.0,<2.0
+datasets>=2.18,<5.0
+
+# --- Knowledge tracing / verifier numerics ---
+numpy>=1.26,<3.0
+pandas>=2.0,<3.0
+scikit-learn>=1.3
+matplotlib>=3.7
+scipy>=1.11
+
+# --- Config / IO ---
+PyYAML>=6.0
+hydra-core>=1.3,<2.0
+omegaconf>=2.3,<3.0
+pydantic>=2.0,<3.0
+
+# --- Utilities ---
+einops>=0.7
+regex
+tqdm
+requests
+filelock
+packaging
+psutil
+Pillow
+rich
+dill
+cloudpickle
+codetiming
+sympy
+typer
+
+# --- Experiment tracking (imported by verifier/train.py at module load) ---
+wandb

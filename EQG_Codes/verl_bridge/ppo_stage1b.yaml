@@ -1,0 +1,80 @@
+# Stage 1b Configuration: V_align Optimization with Forced (c,d) Prefix
+#
+# Goal: Improve question-KC alignment without expensive V_edu computation
+# Method: Forced JSON prefix with ground-truth (c,d), model generates question_text
+# Reward: V_align only (verifier score)
+# Training: Short RL fine-tuning from Stage 1a SFT checkpoint
+# Expected: V_align 78% → 80%+ without gradient on (c,d) selection
+
+defaults:
+  - ppo_trainer
+  - override /data@data: legacy_data
+  - _self_
+
+hydra:
+  searchpath:
+    - file://verl/verl/trainer/config  # Override from script via hydra.searchpath
+
+trainer:
+  project_name: eqg
+  experiment_name: eqg_stage1b
+  nnodes: 1
+  n_gpus_per_node: 1
+  total_epochs: 3  # Short training (Stage 1a already has good alignment)
+  val_before_train: false
+  save_freq: 200
+  test_freq: 50
+  default_local_dir: ./Model  # Override from script
+  max_actor_ckpt_to_keep: 3
+  resume_mode: disable  # Set to auto or specific path to resume from Stage 1a
+
+actor_rollout_ref:
+  actor:
+    ppo_micro_batch_size_per_gpu: 2
+    ppo_mini_batch_size: 16
+    use_kl_loss: true
+    kl_loss_coef: 0.02  # Moderate KL to prevent forgetting SFT alignment
+    checkpoint:
+      save_contents: ['model', 'optimizer', 'extra', 'hf_model']
+  model:
+    # IMPORTANT: Load from Stage 1a SFT checkpoint
+    path: "./Model/stage1_sft_XES3G5M"  # Override from script
+    tokenizer_path: null
+    trust_remote_code: true
+  rollout:
+    name: vllm  # Standard vllm rollout, no custom processors needed
+    load_format: auto
+    response_length: 256  # Only need to generate question_text (prefix already has c,d)
+    tensor_model_parallel_size: 1
+    n: 4  # Sample K completions per prompt for GRPO
+    log_prob_micro_batch_size_per_gpu: 2
+    gpu_memory_utilization: 0.70
+
+data:
+  train_files: ["stage1b_placeholder_train"]
+  val_files: ["stage1b_placeholder_val"]
+  train_batch_size: 32
+  val_batch_size: 16
+  dataloader_num_workers: 0
+  max_prompt_length: 4096
+  truncation: right
+  filter_overlong_prompts: false
+  shuffle: true
+  validation_shuffle: false
+  custom_cls:
+    path: EQG_Codes/verl_bridge/stage1b_dataset.py  # Override from script
+    name: Stage1bDataset
+  eqg:
+    dataset_name: XES3G5M  # Or MOOCRadar - one checkpoint per dataset
+    seed: 1234
+    data_source: eqg_stage1b
+    verbose_sampling: true
+    debug_print_n: 5
+
+custom_reward_function:
+  path: EQG_Codes/verl_bridge/stage1b_reward.py  # Override from script
+  name: compute_score
+
+algorithm:
+  adv_estimator: grpo
+  norm_adv_by_std_in_grpo: true

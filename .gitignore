@@ -1,0 +1,44 @@
+# ====== Large directories (not tracked) ======
+Model/
+EQG_Codes/data/
+Verifier/
+_trash/
+.data_cache/
+data.tar.gz
+
+# Ignore EQG_Codes/output/ except the small Eval-Shared cache.
+EQG_Codes/output/*
+!EQG_Codes/output/exam_eval/
+EQG_Codes/output/exam_eval/*
+!EQG_Codes/output/exam_eval/Eval-Shared/
+!EQG_Codes/output/exam_eval/Eval-Shared/**
+
+# ====== Python ======
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# ====== Virtual environments ======
+.venv/
+venv/
+env/
+
+# ====== Training logs ======
+tensorboard_log/
+wandb/
+*.log
+
+# ====== Jupyter ======
+.ipynb_checkpoints/
+
+# ====== IDEs ======
+.vscode/
+.idea/
+
+# ====== OS ======
+.DS_Store
+Thumbs.db

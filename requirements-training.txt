@@ -1,0 +1,40 @@
+# Extra dependencies needed only for training (Stage 1a SFT, Stage 1b PPO).
+#
+# These packages frequently need a matching CUDA toolchain / specific PyTorch
+# build to install cleanly. If a line fails, install what you can and adapt
+# pins to your environment. On Ascend NPU, replace the CUDA packages with
+# `torch_npu` and `vllm_ascend`.
+#
+# Install ONLY after requirements.txt succeeds.
+
+# Training primitives
+peft==0.18.0
+trl==1.1.0
+tensordict==0.10.0
+
+# Kernels / attention (CUDA-specific builds; may require matching torch)
+flash_attn==2.8.3
+liger_kernel==0.6.4
+triton==3.4.0
+
+# RL rollout backends (pull in ray, vllm, pynvml, etc. as transitive deps)
+# Install whichever your target hardware supports; both are optional.
+# vllm
+# ray
+
+# Verl rollout / verifier plumbing
+msgspec==0.20.0
+pyzmq==27.1.0
+ujson==5.12.0
+pynvml==13.0.1
+nvidia_ml_py==13.590.44
+aiofiles==25.1.0
+aiohttp==3.13.2
+fastapi==0.136.0
+uvicorn==0.44.0
+
+# Experiment tracking (optional alternatives to wandb)
+# clearml==2.1.5
+# mlflow==3.11.1
+# swanlab==0.7.15
+# trackio==0.23.0
